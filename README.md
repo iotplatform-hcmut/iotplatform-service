@@ -1,4 +1,6 @@
-# IoT Platform Service
+# IoT Platform Service 
+
+### JAVA
 
 ```
 sudo apt install openjdk-8-jdk maven
@@ -9,6 +11,17 @@ sudo apt install openjdk-8-jdk maven
 | Run this project   | `mvn spring-boot:run` |
 | Build this project | `mvn package`         |
 
+### PYTHON
+
+```
+pip3 install paho-mqtt # OR
+conda install -c sci-bots paho-mqtt
+```
+
+| Action             | Command                      |
+|--------------------|------------------------------|
+| Run subcriber      | `python3 src_py/mqtt_sub.py` |
+| Build publisher    | `python3 src_py/mqtt_pub.py` |
 
 # Members
 
