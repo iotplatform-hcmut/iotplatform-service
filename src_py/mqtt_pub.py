@@ -1,18 +1,18 @@
 import paho.mqtt.client as mqtt
-import time
+import time, random as rd
 
-# IP address and Port
-HOST, PORT = "iotplatform.xyz", 1883
+# IP address (Host)
+HOST = "iotplatform.xyz"
 # Topic name
-topic = "test"
-# Date send
-data = '{"value": 12}'
+topic = "sensor/humidity"
 
 client = mqtt.Client()
-client.connect(HOST, PORT, 60)
+client.connect(HOST)
 
 while(True):
+    pattern = '{"device_id":"d7_1","value":["%s","%s"]}'
+    data = pattern%(rd.randint(0,1), rd.randint(0,1023))
+    client.publish(topic, data)
     time.sleep(1)
-    client.publish(topic , data)
 
 client.disconnect()

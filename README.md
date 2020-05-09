@@ -14,8 +14,8 @@ sudo apt install openjdk-8-jdk maven
 ### PYTHON
 
 ```
-pip3 install paho-mqtt # OR
-conda install -c sci-bots paho-mqtt
+sudo apt install python3-pip
+pip3 install paho-mqtt pymysql pymysql-pooling
 ```
 
 | Action             | Command                      |
