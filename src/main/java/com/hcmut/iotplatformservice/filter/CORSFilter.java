@@ -25,7 +25,7 @@ public class CORSFilter implements Filter {
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, x-auth-token, Content-Type, "
                 + "Access-Control-Request-Method, Access-Control-Request-Headers, x-requested-with, Authorization");
         response.setHeader("Access-Control-Expose-Headers", "X-Suggested-Filename");
