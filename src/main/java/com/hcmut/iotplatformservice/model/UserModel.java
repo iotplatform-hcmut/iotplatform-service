@@ -1,29 +1,28 @@
 package com.hcmut.iotplatformservice.model;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hcmut.iotplatformservice.database.ConnectionPool;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
+
 // Template model
 public class UserModel {
-    public String addUser(String name, String username, String password, String email, String phone, int birthday) {
-        int count = 0; JsonObject message = new JsonObject();
 
-        try (Connection connection = ConnectionPool.getConnection();
-                Statement statement = connection.createStatement();) {
-            String query = "INSERT INTO `user` (`name`, `username`, `password`, `email`, "
-                    + "`phone`, `birthday`) VALUES ('%s', '%s', '%s', '%s', '%s', %s)";
-            query = String.format(query, name, username, password, email, phone, birthday);
-            count = statement.executeUpdate(query);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private ConnectionPool _dbPool = new ConnectionPool();
+    private static final Logger _logger = Logger.getLogger(UserModel.class);
+
+    public String addUser(String name, String username, String password, String email, String phone, int birthday) {
+        String query = "INSERT INTO user (name, username, password, email, phone, birthday) VALUES (?,?,?,?,?,?)";
+        Object[] arrParam = new Object[] {name, username, password, email, phone, birthday};
+
+        JsonObject message = new JsonObject();
+        int count = _dbPool.execute(query, arrParam);
 
         if(count == 0) message.addProperty("status", "error");
         else message.addProperty("status", "ok");
@@ -31,67 +30,46 @@ public class UserModel {
         return message.toString();
     }
 
-    public String getAllUser() {
-        List<JsonObject> listUser = new ArrayList<>();
+    public String getUserById(int[] ids) {
+        List<JsonObject> lsUser = new LinkedList<>();        
 
-        try (Connection connection = ConnectionPool.getConnection();
-                Statement statement = connection.createStatement();) {
-            ResultSet resultSet = statement.executeQuery("SELECT * from user");
+        String query = String.format(
+            "SELECT * from user WHERE id in (%s)", 
+            ConnectionPool.genQuestion(ids.length));
 
-            while (resultSet.next()) {
+        Object[] arrParam = new Object[ids.length];
+        for(int i = 0; i < ids.length; ++i) arrParam[i] = ids[i];
+
+        _dbPool.execute(query, arrParam, rs -> {
+            try {
                 JsonObject json = new JsonObject();
-                json.addProperty("key", resultSet.getInt("id"));
-                json.addProperty("name", resultSet.getString("name"));
-                json.addProperty("username", resultSet.getString("username"));
-                json.addProperty("email", resultSet.getString("email"));
-                json.addProperty("phone", resultSet.getString("phone"));
-                json.addProperty("birthday", resultSet.getInt("birthday"));
-                listUser.add(json);
+                json.addProperty("key", rs.getInt("id"));
+                json.addProperty("name", rs.getString("name"));
+                json.addProperty("username", rs.getString("username"));
+                json.addProperty("email", rs.getString("email"));
+                json.addProperty("phone", rs.getString("phone"));
+                json.addProperty("birthday", rs.getInt("birthday"));
+                lsUser.add(json);
+            } catch (SQLException ex) {
+                _logger.info(ex.getMessage(), ex);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
 
-        String message = new Gson().toJson(listUser);
-
-        return message;
+        return new Gson().toJson(lsUser);
     }
 
-    public String getUserById(int id) {
-        JsonObject json = new JsonObject();
+    public String deleteUser(int[] ids) {
+        String query = String.format(
+            "DELETE FROM user WHERE id in (%s)", 
+            ConnectionPool.genQuestion(ids.length));
 
-        try (Connection connection = ConnectionPool.getConnection();
-                Statement statement = connection.createStatement();) {
-            String query = "SELECT * from user WHERE id = '%s'";
-            query = String.format(query, id);
-            ResultSet resultSet = statement.executeQuery(query);
+        Object[] arrParam = new Object[ids.length];
+        for(int i = 0; i < ids.length; ++i) arrParam[i] = ids[i];
 
-            if (resultSet.next()) {
-                json.addProperty("key", resultSet.getInt("id"));
-                json.addProperty("name", resultSet.getString("name"));
-                json.addProperty("username", resultSet.getString("username"));
-                json.addProperty("email", resultSet.getString("email"));
-                json.addProperty("phone", resultSet.getString("phone"));
-                json.addProperty("birthday", resultSet.getInt("birthday"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JsonObject message = new JsonObject();
 
-        return json.toString();
-    }
+        int count = _dbPool.execute(query, arrParam);
 
-    public String deleteUser(int id) {
-        int count = 0; JsonObject message = new JsonObject();
-
-        try (Connection connection = ConnectionPool.getConnection();
-                Statement statement = connection.createStatement();) {
-            String query = "DELETE FROM user WHERE id = %s";
-            query = String.format(query, id);
-            count = statement.executeUpdate(query);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         if(count == 0) message.addProperty("status", "error");
         else message.addProperty("status", "ok");
@@ -100,7 +78,7 @@ public class UserModel {
     }
 
     private UserModel() {
-
+        BasicConfigurator.configure();
     }
 
     private static class LazyHolder {
