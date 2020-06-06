@@ -11,6 +11,7 @@ import org.apache.log4j.BasicConfigurator;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 // Template model
 public class HumidityModel {
 
@@ -103,6 +104,42 @@ public class HumidityModel {
         }
     
         json.add("data",jsonArrData);
+        return json.toString();
+    }
+
+    public String getAverageMaxMinHumidity(String ids, int startTime, int endTime) {
+        JsonArray listValue = new JsonArray();
+        float averageHumidity = 0;
+        int maxHumidity = 0, minHumidity = 0;
+
+        String query = "SELECT value FROM humidity WHERE device_id=? AND timestamp > ? AND timestamp < ?";
+        Object[] arrParam = new Object[] {ids, startTime, endTime};
+
+        _dbPool.execute(query, arrParam, rs -> {
+            try {
+                listValue.add(rs.getInt("value"));
+            } catch (SQLException ex) {
+                _logger.info(ex.getMessage(), ex);
+            }
+        });
+
+        ArrayList<Integer> listValue2ArrayList = new ArrayList<Integer>();   
+        for (int i = 0; i < listValue.size(); ++i) {
+            listValue2ArrayList.add(Integer.parseInt(listValue.get(i).getAsString()));
+        }
+        for (int value: listValue2ArrayList){
+            averageHumidity += value;
+        }
+        averageHumidity = averageHumidity/listValue2ArrayList.size();
+        minHumidity = Collections.min(listValue2ArrayList);
+        maxHumidity = Collections.max(listValue2ArrayList); 
+
+        JsonObject json = new JsonObject();
+        json.addProperty("name", ids);
+        json.addProperty("averageHumidity", averageHumidity);
+        json.addProperty("maxHumidity", maxHumidity);
+        json.addProperty("minHumidity", minHumidity);
+
         return json.toString();
     }
 

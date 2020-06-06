@@ -32,4 +32,13 @@ public class HumidityController {
         return HumidityModel.getInstance().getAll(ids, startTime, endTime, state, min, max, limit);
     }
 
-}
+
+    @GetMapping(value = "api/humidity_averagemaxmin", produces = "application/json")
+    public String readHumiditiesSensor(
+        @RequestParam(value = "ids", required = false, defaultValue = "all") String ids,
+        @RequestParam(value = "startTime", required = false, defaultValue = "0") int startTime,
+        @RequestParam(value = "endTime", required = false, defaultValue = "99999") int endTime
+        ) 
+    {
+        return HumidityModel.getInstance().getAverageMaxMinHumidity(ids, startTime, endTime);
+    }
