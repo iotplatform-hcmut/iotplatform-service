@@ -31,4 +31,5 @@ public class HumidityController {
     {
         return HumidityModel.getInstance().getAll(ids, startTime, endTime, state, min, max, limit);
     }
+
 }

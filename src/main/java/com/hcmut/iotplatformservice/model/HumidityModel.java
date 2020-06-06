@@ -117,4 +117,8 @@ public class HumidityModel {
     public static HumidityModel getInstance() {
         return LazyHolder._INSTANCE;
     }
+
+    public static void main(String[] args) {
+        System.out.println("\nRun time");
+    }
 }
