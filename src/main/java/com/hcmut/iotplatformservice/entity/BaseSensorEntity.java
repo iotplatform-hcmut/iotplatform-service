@@ -9,18 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BaseSensorEntity extends BaseEntity {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private int timeStamp;
-    private boolean state;
+    protected String id;
+    private int timestamp;
+    private int state;
     private int value;
-
-    public BaseSensorEntity(String id, int value) {
-        this.id = id;
-        this.value = value;
-    }
 }

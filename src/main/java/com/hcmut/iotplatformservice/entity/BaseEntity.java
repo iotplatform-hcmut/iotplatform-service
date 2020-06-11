@@ -15,4 +15,8 @@ public class BaseEntity implements Serializable {
     public String toString(){
         return new Gson().toJson(this);
     }
+
+    public String toJson(){
+        return new Gson().toJson(this);
+    }
 }

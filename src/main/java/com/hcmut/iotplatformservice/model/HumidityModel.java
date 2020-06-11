@@ -1,9 +1,10 @@
 package com.hcmut.iotplatformservice.model;
 
-import com.hcmut.iotplatformservice.entity.BaseSensorEntity;
+import com.hcmut.iotplatformservice.entity.*;
 
 import java.sql.SQLException;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.hcmut.iotplatformservice.database.ConnectionPool;
@@ -14,6 +15,7 @@ import org.apache.log4j.BasicConfigurator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+
 // Template model
 public class HumidityModel {
 
@@ -24,7 +26,7 @@ public class HumidityModel {
         JsonArray listValue = new JsonArray();
 
         String query = "SELECT value FROM humidity WHERE device_id=? LIMIT ?";
-        Object[] arrParam = new Object[] {device_id, limit};
+        Object[] arrParam = new Object[] { device_id, limit };
 
         _dbPool.execute(query, arrParam, rs -> {
             try {
@@ -41,78 +43,67 @@ public class HumidityModel {
         return json.toString();
     }
 
-    public static String getAll(String[] ids, int startTime, int  endTime, int state, int min, int max, int limit) {
+    public static String getAll(String[] ids, int startTime, int endTime, int state, int min, int max, int limit) {
 
-        String arrId[] = null;
-        List<String> list = new ArrayList<>();
-        
+        String arrId[] = ids;
+        List<String> listId = new ArrayList<>();
+
         if (ids[0].equals("all")) {
             String queryGetId = "SELECT DISTINCT id FROM humidity";
             _dbPool.execute(queryGetId, null, rs -> {
                 try {
-                    list.add(rs.getString("id"));
+                    listId.add(rs.getString("id"));
                 } catch (SQLException ex) {
                     _logger.info(ex.getMessage(), ex);
                 }
             });
-            arrId = new String[list.size()];
-            arrId = list.toArray(arrId);
-        } else {
-            arrId = ids;
+            arrId = new String[listId.size()];
+            arrId = listId.toArray(arrId);
         }
 
-        JsonArray jsonArrData = new JsonArray();
-        JsonObject json = new JsonObject();
-
-        json.addProperty("startTime", String.valueOf(startTime));
-        json.addProperty("endTime", String.valueOf(endTime));
-        json.addProperty("state", String.valueOf(state));
-        json.addProperty("minValue", String.valueOf(min));
-        json.addProperty("maxValue", String.valueOf(max));
-        json.addProperty("limit", String.valueOf(limit));
-
-        Object[] arrParam = new Object[] {ids, startTime, endTime, min, max, limit};
+        Object[] arrParam = new Object[] { ids, startTime, endTime, min, max, limit };
         String query = "SELECT * FROM humidity WHERE ";
-            query += "id=? ";
-            query += "AND timestamp > ? AND timestamp < ? ";
+        query += "id=? ";
+        query += "AND timestamp > ? AND timestamp < ? ";
         if (state > -1) {
             query += "AND state=? ";
             arrParam = new Object[] { ids, startTime, endTime, state, min, max, limit };
         }
-            query += "AND value>? AND value<? ";
-            query += "LIMIT ?";
+        query += "AND value>? AND value<? ";
+        query += "LIMIT ?";
 
-        // List<BaseSensorEntity> listSensor = new ArrayList<BaseSensorEntity>();
-
+        List<Sensor> listSensor = new ArrayList<Sensor>();
         for (String id : arrId) {
-            JsonArray listTime = new JsonArray();
-            JsonArray listState = new JsonArray();
-            JsonArray listValue = new JsonArray();
-            JsonObject jsonObj = new JsonObject();
-            arrParam[0] = id;
 
-            // BaseSensorEntity data = new BaseSensorEntity();
-            
-            
+            arrParam[0] = id;
+            Sensor sensor = new Sensor(id);
+
             _dbPool.execute(query, arrParam, rs -> {
                 try {
-                    listTime.add(rs.getInt("timestamp"));
-                    listState.add(rs.getInt("state"));
-                    listValue.add(rs.getInt("value"));
-                    // data.setData(rs.getInt("timestamp"), rs.getInt("state"), rs.getInt("value"));
+                    sensor.pushData(rs.getInt("timestamp"), rs.getInt("state"), rs.getInt("value"));
                 } catch (SQLException ex) {
                     _logger.info(ex.getMessage(), ex);
                 }
             });
+      
+            if (sensor.getValues().size() > 0)
+                listSensor.add(sensor);
 
-            jsonObj.addProperty("id", String.valueOf(id));
-            jsonObj.add("time", listTime);
-            jsonObj.add("state", listState);
-            jsonObj.add("value", listValue);
-            jsonArrData.add(jsonObj);
         }
 
+        JsonObject json = new JsonObject();
+
+        json.addProperty("startTime", startTime);
+        json.addProperty("endTime", endTime);
+        json.addProperty("state", state);
+        json.addProperty("minValue", min);
+        json.addProperty("maxValue", max);
+        json.addProperty("limit", limit);
+
+        String jsonData = new Gson().toJson(listSensor);
+        JsonArray jsonArrData = new Gson().fromJson(jsonData, JsonArray.class);
         json.add("data", jsonArrData);
+
         return json.toString();
     }
 
@@ -152,6 +143,13 @@ public class HumidityModel {
         return json.toString();
     }
 
+    public static void main(String[] args) {
+        System.out.println("\n-------------------------\n---------Run time---------");
+        String[] ids = { "d0_0", "d1_0" };
+        String test = getAll(ids, 0, Integer.MAX_VALUE, -1, 0, 99999, 5);
+        System.out.println(test);
+    }
+
     private HumidityModel() {
         BasicConfigurator.configure();
     }
@@ -164,10 +162,4 @@ public class HumidityModel {
         return LazyHolder._INSTANCE;
     }
 
-    public static void main(String[] args) {
-        System.out.println("\nRun time");
-        String[] ids = { "d0_0","d0_1" };
-        String test = getAll(ids, 0, Integer.MAX_VALUE, -1, 0, 99999, 5);
-        System.out.println(test);
-    }
 }
