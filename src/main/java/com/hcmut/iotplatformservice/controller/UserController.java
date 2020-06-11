@@ -28,7 +28,7 @@ public class UserController {
 		return UserModel.getInstance().getUserById(ids);
 	}
 
-	// DETELE
+	// DELETE
 	@DeleteMapping(value = "api/user")
 	public String deleteUser(@RequestParam(value = "ids") int[] ids) {
 		
