@@ -1,5 +1,7 @@
 package com.hcmut.iotplatformservice.model;
 
+import com.hcmut.iotplatformservice.entity.BaseSensorEntity;
+
 import java.sql.SQLException;
 
 import com.google.gson.JsonArray;
@@ -15,7 +17,7 @@ import java.util.Collections;
 // Template model
 public class HumidityModel {
 
-    private ConnectionPool _dbPool = new ConnectionPool();
+    private static ConnectionPool _dbPool = new ConnectionPool();
     private static final Logger _logger = Logger.getLogger(HumidityModel.class);
 
     public String getValueByDeviceId(String device_id, int limit) {
@@ -39,24 +41,24 @@ public class HumidityModel {
         return json.toString();
     }
 
-    public String getAll(String ids, int startTime, int endTime, int state, int min, int max, int limit) {
-        
+    public static String getAll(String[] ids, int startTime, int  endTime, int state, int min, int max, int limit) {
+
         String arrId[] = null;
         List<String> list = new ArrayList<>();
-        if (ids.equals("all")){
-            String queryGetId = "SELECT DISTINCT device_id FROM humidity";
+        
+        if (ids[0].equals("all")) {
+            String queryGetId = "SELECT DISTINCT id FROM humidity";
             _dbPool.execute(queryGetId, null, rs -> {
                 try {
-                    list.add(rs.getString("device_id"));
+                    list.add(rs.getString("id"));
                 } catch (SQLException ex) {
                     _logger.info(ex.getMessage(), ex);
                 }
             });
             arrId = new String[list.size()];
             arrId = list.toArray(arrId);
-        }
-        else{
-            arrId = ids.split(",");
+        } else {
+            arrId = ids;
         }
 
         JsonArray jsonArrData = new JsonArray();
@@ -68,29 +70,36 @@ public class HumidityModel {
         json.addProperty("minValue", String.valueOf(min));
         json.addProperty("maxValue", String.valueOf(max));
         json.addProperty("limit", String.valueOf(limit));
-        
+
         Object[] arrParam = new Object[] {ids, startTime, endTime, min, max, limit};
         String query = "SELECT * FROM humidity WHERE ";
-            query += "device_id=? ";
+            query += "id=? ";
             query += "AND timestamp > ? AND timestamp < ? ";
-        if (state > -1){
+        if (state > -1) {
             query += "AND state=? ";
-            arrParam = new Object[] {ids, startTime, endTime, state, min, max, limit};
+            arrParam = new Object[] { ids, startTime, endTime, state, min, max, limit };
         }
             query += "AND value>? AND value<? ";
             query += "LIMIT ?";
-        
-        for (String id:arrId){   
+
+        // List<BaseSensorEntity> listSensor = new ArrayList<BaseSensorEntity>();
+
+        for (String id : arrId) {
             JsonArray listTime = new JsonArray();
             JsonArray listState = new JsonArray();
             JsonArray listValue = new JsonArray();
             JsonObject jsonObj = new JsonObject();
             arrParam[0] = id;
+
+            // BaseSensorEntity data = new BaseSensorEntity();
+            
+            
             _dbPool.execute(query, arrParam, rs -> {
                 try {
                     listTime.add(rs.getInt("timestamp"));
                     listState.add(rs.getInt("state"));
                     listValue.add(rs.getInt("value"));
+                    // data.setData(rs.getInt("timestamp"), rs.getInt("state"), rs.getInt("value"));
                 } catch (SQLException ex) {
                     _logger.info(ex.getMessage(), ex);
                 }
@@ -102,8 +111,8 @@ public class HumidityModel {
             jsonObj.add("value", listValue);
             jsonArrData.add(jsonObj);
         }
-    
-        json.add("data",jsonArrData);
+
+        json.add("data", jsonArrData);
         return json.toString();
     }
 
@@ -113,7 +122,7 @@ public class HumidityModel {
         int maxHumidity = 0, minHumidity = 0;
 
         String query = "SELECT value FROM humidity WHERE device_id=? AND timestamp > ? AND timestamp < ?";
-        Object[] arrParam = new Object[] {ids, startTime, endTime};
+        Object[] arrParam = new Object[] { ids, startTime, endTime };
 
         _dbPool.execute(query, arrParam, rs -> {
             try {
@@ -123,16 +132,16 @@ public class HumidityModel {
             }
         });
 
-        ArrayList<Integer> listValue2ArrayList = new ArrayList<Integer>();   
+        ArrayList<Integer> listValue2ArrayList = new ArrayList<Integer>();
         for (int i = 0; i < listValue.size(); ++i) {
             listValue2ArrayList.add(Integer.parseInt(listValue.get(i).getAsString()));
         }
-        for (int value: listValue2ArrayList){
+        for (int value : listValue2ArrayList) {
             averageHumidity += value;
         }
-        averageHumidity = averageHumidity/listValue2ArrayList.size();
+        averageHumidity = averageHumidity / listValue2ArrayList.size();
         minHumidity = Collections.min(listValue2ArrayList);
-        maxHumidity = Collections.max(listValue2ArrayList); 
+        maxHumidity = Collections.max(listValue2ArrayList);
 
         JsonObject json = new JsonObject();
         json.addProperty("name", ids);
@@ -157,5 +166,8 @@ public class HumidityModel {
 
     public static void main(String[] args) {
         System.out.println("\nRun time");
+        String[] ids = { "d0_0","d0_1" };
+        String test = getAll(ids, 0, Integer.MAX_VALUE, -1, 0, 99999, 5);
+        System.out.println(test);
     }
 }
