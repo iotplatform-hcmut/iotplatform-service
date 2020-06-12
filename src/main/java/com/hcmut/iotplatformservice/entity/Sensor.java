@@ -6,44 +6,40 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Getter
-public class Sensor extends BaseSensorEntity {
+public class Sensor extends BaseEntity {
 
     private static final long serialVersionUID = 2L;
 
+    private String id;
     private List<Integer> timestamps;
-    private List<Integer> states;
     private List<Integer> values;
 
     public Sensor(String id) {
         this.id = id;
         this.timestamps = new ArrayList<>();
-        this.states = new ArrayList<>();
         this.values = new ArrayList<>();
     }
 
-    @Override
+    // Get current timestamp
     public int getTimestamp(){
         return timestamps.get(timestamps.size() - 1);
     }
 
-    @Override
-    public int getState(){
-        return states.get(states.size() - 1);
-    }
-
-    @Override
+    // Get current value
     public int getValue(){
         return values.get(values.size() - 1);
     }
 
-    public void pushData(int time, int state, int value){
+    public void push(int time, int value){
         this.timestamps.add(time);
-        this.states.add(state);
         this.values.add(value);
     }
 
-    public int getMaxValue() {
-        // Thành làm nè
-        return 0;
-    }
+    // Thành làm nè
+    // public void pushValue(){}
+
+    // public int getMaxValue() {
+        
+    //     return 0;
+    // }
 }

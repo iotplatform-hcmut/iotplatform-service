@@ -43,44 +43,53 @@ public class HumidityModel {
         return json.toString();
     }
 
-    public static String getAll(String[] ids, int startTime, int endTime, int state, int min, int max, int limit) {
-
-        String arrId[] = ids;
+    private static String[] getAllId() {
         List<String> listId = new ArrayList<>();
+        String queryGetId = "SELECT DISTINCT id FROM humidity";
+        _dbPool.execute(queryGetId, null, rs -> {
+            try {
+                listId.add(rs.getString("id"));
+            } catch (SQLException ex) {
+                _logger.info(ex.getMessage(), ex);
+            }
+        });
+        return (String[]) listId.toArray();
+    }
 
+    public static List<Sensor> getAll(String[] ids, int startTime, int endTime, int min, int max, int limit) {
+
+        String[] arrId = ids;
         if (ids[0].equals("all")) {
-            String queryGetId = "SELECT DISTINCT id FROM humidity";
-            _dbPool.execute(queryGetId, null, rs -> {
-                try {
-                    listId.add(rs.getString("id"));
-                } catch (SQLException ex) {
-                    _logger.info(ex.getMessage(), ex);
-                }
-            });
-            arrId = new String[listId.size()];
-            arrId = listId.toArray(arrId);
+            arrId = getAllId();
         }
-
-        Object[] arrParam = new Object[] { ids, startTime, endTime, min, max, limit };
+       
+        List<Object> arr = new ArrayList<>();
+        arr.add(ids);
+        arr.add(startTime);
+        arr.add(endTime);
+        
         String query = "SELECT * FROM humidity WHERE ";
         query += "id=? ";
         query += "AND timestamp > ? AND timestamp < ? ";
-        if (state > -1) {
-            query += "AND state=? ";
-            arrParam = new Object[] { ids, startTime, endTime, state, min, max, limit };
+        if (min > 0){
+            query += "AND value>? AND value<? ";
+            arr.add(min);
+            arr.add(max);
         }
-        query += "AND value>? AND value<? ";
-        query += "LIMIT ?";
+        if (limit > 0){
+            query += "LIMIT ?";
+            arr.add(limit);
+        }
 
         List<Sensor> listSensor = new ArrayList<Sensor>();
         for (String id : arrId) {
 
-            arrParam[0] = id;
+            arr.set(0, id);
             Sensor sensor = new Sensor(id);
 
-            _dbPool.execute(query, arrParam, rs -> {
+            _dbPool.execute(query, arr.toArray(), rs -> {
                 try {
-                    sensor.pushData(rs.getInt("timestamp"), rs.getInt("state"), rs.getInt("value"));
+                    sensor.push(rs.getInt("timestamp"), rs.getInt("value"));
                 } catch (SQLException ex) {
                     _logger.info(ex.getMessage(), ex);
                 }
@@ -88,26 +97,13 @@ public class HumidityModel {
       
             if (sensor.getValues().size() > 0)
                 listSensor.add(sensor);
-
         }
 
-        JsonObject json = new JsonObject();
-
-        json.addProperty("startTime", startTime);
-        json.addProperty("endTime", endTime);
-        json.addProperty("state", state);
-        json.addProperty("minValue", min);
-        json.addProperty("maxValue", max);
-        json.addProperty("limit", limit);
-
-        String jsonData = new Gson().toJson(listSensor);
-        JsonArray jsonArrData = new Gson().fromJson(jsonData, JsonArray.class);
-        json.add("data", jsonArrData);
-
-        return json.toString();
+        return listSensor;
     }
 
     public String getAverageMaxMinHumidity(String ids, int startTime, int endTime) {
+        
         JsonArray listValue = new JsonArray();
         float averageHumidity = 0;
         int maxHumidity = 0, minHumidity = 0;
@@ -146,8 +142,8 @@ public class HumidityModel {
     public static void main(String[] args) {
         System.out.println("\n-------------------------\n---------Run time---------");
         String[] ids = { "d0_0", "d1_0" };
-        String test = getAll(ids, 0, Integer.MAX_VALUE, -1, 0, 99999, 5);
-        System.out.println(test);
+        List<Sensor> test = getAll(ids, 0, Integer.MAX_VALUE, 0, 99999, 5);
+        System.out.println(test.toString());
     }
 
     private HumidityModel() {
