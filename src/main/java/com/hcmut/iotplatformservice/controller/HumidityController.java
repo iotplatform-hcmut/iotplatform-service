@@ -1,5 +1,12 @@
 package com.hcmut.iotplatformservice.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.hcmut.iotplatformservice.entity.Sensor;
 import com.hcmut.iotplatformservice.model.HumidityModel;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +29,21 @@ public class HumidityController {
             @RequestParam(value = "ids", required = false, defaultValue = "all") String[] ids,
             @RequestParam(value = "startTime", required = false, defaultValue = "0") int startTime,
             @RequestParam(value = "endTime", required = false, defaultValue = "2000000000") int endTime,
-            @RequestParam(value = "state", required = false, defaultValue = "-1") int state,
             @RequestParam(value = "min", required = false, defaultValue = "0") int min,
-            @RequestParam(value = "max", required = false, defaultValue = "300") int max,
-            @RequestParam(value = "limit", required = false, defaultValue = "5") int limit) {
-        HumidityModel.getInstance();
-        return HumidityModel.getAll(ids, startTime, endTime, state, min, max, limit);
+            @RequestParam(value = "max", required = false, defaultValue = "0") int max,
+            @RequestParam(value = "limit", required = false, defaultValue = "0") int limit) {
+        
+        JsonObject json = new JsonObject();
+        json.addProperty("startTime", startTime);
+        json.addProperty("endTime", endTime);
+        json.addProperty("minValue", min);
+        json.addProperty("maxValue", max);
+        json.addProperty("limit", limit);
+        
+        List<Sensor> listSensor = HumidityModel.getAll(ids, startTime, endTime, min, max, limit);
+        String jsonData = new Gson().toJson(listSensor);
+
+        return jsonData;
     }
 
     @GetMapping(value = "api/humidity_averageMaxMin", produces = "application/json")
