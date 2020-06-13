@@ -53,7 +53,8 @@ public class HumidityModel {
                 _logger.info(ex.getMessage(), ex);
             }
         });
-        return (String[]) listId.toArray();
+        String[] arrId= new String[listId.size()];
+        return listId.toArray(arrId);
     }
 
     public static List<Sensor> getAll(String[] ids, int startTime, int endTime, int min, int max, int limit) {
