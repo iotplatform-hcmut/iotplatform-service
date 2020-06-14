@@ -4,7 +4,6 @@ import com.hcmut.iotplatformservice.entity.*;
 
 import java.sql.SQLException;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.hcmut.iotplatformservice.database.ConnectionPool;
@@ -103,47 +102,61 @@ public class HumidityModel {
         return listSensor;
     }
 
-    public String getAverageMaxMinHumidity(String ids, int startTime, int endTime) {
+    public static List<AverageMaxMinHumidity> getAverageMaxMinHumidity(String[] ids, int startTime, int endTime) {
+               
+        List<AverageMaxMinHumidity> listAverageMaxMinHumidity = new ArrayList<AverageMaxMinHumidity>();
+        List<Object> arr = new ArrayList<>();
+        arr.add(0);
+        arr.add(startTime);
+        arr.add(endTime);
         
-        JsonArray listValue = new JsonArray();
-        float averageHumidity = 0;
-        int maxHumidity = 0, minHumidity = 0;
-
-        String query = "SELECT value FROM humidity WHERE device_id=? AND timestamp > ? AND timestamp < ?";
-        Object[] arrParam = new Object[] { ids, startTime, endTime };
-
-        _dbPool.execute(query, arrParam, rs -> {
-            try {
-                listValue.add(rs.getInt("value"));
-            } catch (SQLException ex) {
-                _logger.info(ex.getMessage(), ex);
-            }
-        });
-
-        ArrayList<Integer> listValue2ArrayList = new ArrayList<Integer>();
-        for (int i = 0; i < listValue.size(); ++i) {
-            listValue2ArrayList.add(Integer.parseInt(listValue.get(i).getAsString()));
+        String query = "SELECT value FROM humidity WHERE id=? AND timestamp > ? AND timestamp < ? ";
+        
+        String[] arrId = ids;
+        if (ids[0].equals("all")) {
+            arrId = getAllId();
         }
-        for (int value : listValue2ArrayList) {
-            averageHumidity += value;
+
+        for (String id : arrId) {
+            
+            AverageMaxMinHumidity AMMHumidity = new AverageMaxMinHumidity(id,startTime,endTime);
+            ArrayList<Integer> totalValueList = new ArrayList<Integer>();
+            float averageHumidity = 0;
+
+            arr.set(0, id);
+            _dbPool.execute(query, arr.toArray(), rs -> {
+                try {
+                    totalValueList.add(rs.getInt("value"));                    
+                } catch (SQLException ex) {
+                    _logger.info(ex.getMessage(), ex);
+                }
+            });
+
+            if (Collections.max(totalValueList) > 0){
+                for (int value: totalValueList){
+                    averageHumidity += value;
+                }
+                averageHumidity = averageHumidity/totalValueList.size();
+                AMMHumidity.setAverageMaxMin(averageHumidity, Collections.max(totalValueList), Collections.min(totalValueList));
+            listAverageMaxMinHumidity.add(AMMHumidity);
+            }            
         }
-        averageHumidity = averageHumidity / listValue2ArrayList.size();
-        minHumidity = Collections.min(listValue2ArrayList);
-        maxHumidity = Collections.max(listValue2ArrayList);
 
-        JsonObject json = new JsonObject();
-        json.addProperty("name", ids);
-        json.addProperty("averageHumidity", averageHumidity);
-        json.addProperty("maxHumidity", maxHumidity);
-        json.addProperty("minHumidity", minHumidity);
-
-        return json.toString();
+        return listAverageMaxMinHumidity;
     }
 
+    // public static void main(String[] args) {
+    //     System.out.println("\n-------------------------\n---------Run time---------");
+    //     String[] ids = { "d0_0", "d1_0" };
+    //     List<Sensor> test = getAll(ids, 0, Integer.MAX_VALUE, 0, 99999, 5);
+    //     System.out.println(test.toString());
+    // }
+
+    //Test getAverageMaxMin()
     public static void main(String[] args) {
         System.out.println("\n-------------------------\n---------Run time---------");
-        String[] ids = { "d0_0", "d1_0" };
-        List<Sensor> test = getAll(ids, 0, Integer.MAX_VALUE, 0, 99999, 5);
+        String[] ids = { "d1_0", "d1_1" };
+        List<AverageMaxMinHumidity> test = getAverageMaxMinHumidity(ids,0,2000000000);
         System.out.println(test.toString());
     }
 

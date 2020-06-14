@@ -34,12 +34,5 @@ public class Sensor extends BaseEntity {
         this.timestamps.add(time);
         this.values.add(value);
     }
-
-    // Thành làm nè
-    // public void pushValue(){}
-
-    // public int getMaxValue() {
-        
-    //     return 0;
-    // }
+    
 }
