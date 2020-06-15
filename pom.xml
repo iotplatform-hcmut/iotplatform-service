@@ -75,6 +75,13 @@
 			</exclusions>
 		</dependency>
 
+		<!-- https://www.baeldung.com/java-mqtt-client?fbclid=IwAR3ul58HwN_SfFk47PNphi1eyl0T_sPTl5bTcypG5b4SzwhlnGQeTA8P_Pc -->
+		<dependency>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
