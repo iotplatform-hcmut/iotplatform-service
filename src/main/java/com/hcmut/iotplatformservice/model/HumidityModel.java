@@ -18,8 +18,9 @@ import java.util.Collections;
 // Template model
 public class HumidityModel {
 
+
     private ConnectionPool _dbPool;
-    private static final Logger _logger = Logger.getLogger(UserModel.class);
+    private static final Logger _logger = Logger.getLogger(HumidityModel.class);
 
     public String getValueByDeviceId(String device_id, int limit) {
         JsonArray listValue = new JsonArray();
@@ -56,7 +57,9 @@ public class HumidityModel {
         return listId.toArray(arrId);
     }
 
-    public List<Sensor> getAll(String[] ids, int startTime, int endTime, int min, int max, int limit) {
+
+    public List<SensorData> getAll(String[] ids, int startTime, int endTime, int min, int max, int limit) {
+
 
         String[] arrId = ids;
         if (ids[0].equals("all")) {
@@ -81,11 +84,11 @@ public class HumidityModel {
             arr.add(limit);
         }
 
-        List<Sensor> listSensor = new ArrayList<Sensor>();
+        List<SensorData> listSensor = new ArrayList<SensorData>();
         for (String id : arrId) {
 
             arr.set(0, id);
-            Sensor sensor = new Sensor(id);
+            SensorData sensor = new SensorData(id);
 
             _dbPool.execute(query, arr.toArray(), rs -> {
                 try {
@@ -153,13 +156,15 @@ public class HumidityModel {
 
     private static void testGetAll() {
         String[] ids = { "d0_0", "d1_0" };
-        List<Sensor> test = getInstance().getAll(ids, 0, Integer.MAX_VALUE, 0, 99999, 5);
+        List<SensorData> test = getInstance().getAll(ids, 0, Integer.MAX_VALUE, 0, 99999, 5);
         System.out.println(test.toString());
     }
 
     private static void testGetAverageMaxMinHumidity() {
         String[] ids = { "d1_0", "d1_1" };
-        List<AverageMaxMinHumidity> test = getInstance().getAverageMaxMinHumidity(ids, 0, 2000000000);
+
+        List<AverageMaxMinHumidity> test = getInstance().getAverageMaxMinHumidity(ids,0,2000000000);
+
         System.out.println(test.toString());
     }
 

@@ -5,14 +5,16 @@ import time, json
 
 HOST = "iotplatform.xyz"
 TOPIC = "sensor/humidity"
-SQL = "INSERT INTO `humidity` (`device`, `timestamp`, `state`, `value`) VALUES (%s, %s, %s, %s)"
+SQL = "INSERT INTO `humidity` (`id`, `timestamp`, `value`) VALUES (%s, %s, %s)"
 
-def extract_data(data:dict) -> tuple:
-    device_id = data['device_id']
-    pair = data['value']
-    state = int(pair[0])
-    value = int(pair[1])
-    return device_id, state, value
+def extract_data(data:list):
+    result = []
+    for ele in data:
+        id = ele['device_id']
+        pair = ele['values']
+        value = int(pair[0])
+        result += [[id, value]]
+    return result
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -24,9 +26,10 @@ def on_connect(client, userdata, flags, rc):
  
 def on_message(client, userdata, message:mqtt.MQTTMessage):
     data = json.loads(message.payload.decode("utf-8"))
-
+    print(data)
     try:
-        device_id, state, value = extract_data(data)
+        arrData = extract_data(data)
+        print(arrData)
     except:
         print("[ERROR] JSON format is wrong.")
         return
@@ -36,7 +39,8 @@ def on_message(client, userdata, message:mqtt.MQTTMessage):
         with connection.cursor() as cursor:
             # Create a new record
             timestamp = int(time.time()) 
-            cursor.execute(SQL, (device_id, timestamp, state, value))
+            for data in arrData:
+                cursor.execute(SQL, (data[0], timestamp, data[1]))
     except:
         print("[ERROR] Database error.")
     finally:
@@ -56,21 +60,26 @@ if __name__ == "__main__":
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
+    client.username_pw_set("BKvm2","Hcmut_CSE_2020")
+
+    print("------------------\n")
     
-    client.connect(HOST)
+
+    client.connect("13.76.250.158")
     client.loop_start()
     
     while Connected != True:
         time.sleep(0.1)
     
-    client.subscribe(TOPIC)
+    client.subscribe("Topic/Mois")
     
     try:
         while True:
             time.sleep(1)
     
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         client.disconnect()
         client.loop_stop()
         pool.destroy()
+        print("unSub")
  

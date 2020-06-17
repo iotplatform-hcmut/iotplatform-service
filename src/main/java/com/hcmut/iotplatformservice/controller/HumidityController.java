@@ -3,9 +3,8 @@ package com.hcmut.iotplatformservice.controller;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hcmut.iotplatformservice.entity.AverageMaxMinHumidity;
-import com.hcmut.iotplatformservice.entity.Sensor;
+import com.hcmut.iotplatformservice.entity.SensorData;
 import com.hcmut.iotplatformservice.model.HumidityModel;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,27 +31,22 @@ public class HumidityController {
             @RequestParam(value = "max", required = false, defaultValue = "0") int max,
             @RequestParam(value = "limit", required = false, defaultValue = "0") int limit) {
 
-        JsonObject json = new JsonObject();
-        json.addProperty("startTime", startTime);
-        json.addProperty("endTime", endTime);
-        json.addProperty("minValue", min);
-        json.addProperty("maxValue", max);
-        json.addProperty("limit", limit);
-
-        List<Sensor> listSensor = HumidityModel.getInstance().getAll(ids, startTime, endTime, min, max, limit);
+        List<SensorData> listSensor = HumidityModel.getInstance().getAll(ids, startTime, endTime, min, max, limit);
         String jsonData = new Gson().toJson(listSensor);
 
         return jsonData;
     }
 
-    @GetMapping(value = "api/humidity_averagemaxmin", produces = "application/json")
-    public String readHumiditiesSensor(
+    @GetMapping(value = "api/humidity_averageMaxMin", produces = "application/json")
+    public String readAverageMaxMinSensor(
             @RequestParam(value = "ids", required = false, defaultValue = "all") String[] ids,
             @RequestParam(value = "startTime", required = false, defaultValue = "0") int startTime,
             @RequestParam(value = "endTime", required = false, defaultValue = "2000000000") int endTime) {
 
+
         List<AverageMaxMinHumidity> listAverageMaxMinHumidity = HumidityModel.getInstance()
                 .getAverageMaxMinHumidity(ids, startTime, endTime);
+
         String jsonData = new Gson().toJson(listAverageMaxMinHumidity);
 
         return jsonData;

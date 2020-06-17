@@ -21,11 +21,7 @@ public class ConnectionPool {
     public ConnectionPool() {
         BasicConfigurator.configure();
         try {
-            HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setJdbcUrl("jdbc:mysql://iotplatform.xyz:3306/iotplatform");
-            hikariConfig.setUsername("root");
-            hikariConfig.setPassword("a123");
-            hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+            HikariConfig hikariConfig = new HikariConfig("src/conf/iotdb.properties");
             hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
             hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
             hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -209,10 +205,7 @@ public class ConnectionPool {
 
     static public String genQuestion(int m) {
         StringBuilder res = new StringBuilder();
-        while (m > 1) {
-            res.append("?,");
-            --m;
-        }
+        while(m > 1) {res.append("?,"); --m;}
         res.append('?');
         return res.toString();
     }
