@@ -30,7 +30,7 @@ public class HumidityController {
             @RequestParam(value = "min", required = false, defaultValue = "0") int min,
             @RequestParam(value = "max", required = false, defaultValue = "0") int max,
             @RequestParam(value = "limit", required = false, defaultValue = "0") int limit) {
-        
+
         List<SensorData> listSensor = HumidityModel.getInstance().getAll(ids, startTime, endTime, min, max, limit);
         String jsonData = new Gson().toJson(listSensor);
 
@@ -42,8 +42,11 @@ public class HumidityController {
             @RequestParam(value = "ids", required = false, defaultValue = "all") String[] ids,
             @RequestParam(value = "startTime", required = false, defaultValue = "0") int startTime,
             @RequestParam(value = "endTime", required = false, defaultValue = "2000000000") int endTime) {
-               
-        List<AverageMaxMinHumidity> listAverageMaxMinHumidity = HumidityModel.getInstance().getAverageMaxMinHumidity(ids, startTime, endTime);
+
+
+        List<AverageMaxMinHumidity> listAverageMaxMinHumidity = HumidityModel.getInstance()
+                .getAverageMaxMinHumidity(ids, startTime, endTime);
+
         String jsonData = new Gson().toJson(listAverageMaxMinHumidity);
 
         return jsonData;

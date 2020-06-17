@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 public class MqttPubModel {
     private static final Logger _logger = Logger.getLogger(MqttPubModel.class);
     private IMqttClient publisher;
+
     private MqttConnectOptions options;
     
     private MqttPubModel(){
@@ -30,21 +31,25 @@ public class MqttPubModel {
             options.setConnectionTimeout(10);
             publisher.connect(options);
         } catch (Exception e) {
-            _logger.error(e.getMessage(),e);
+            _logger.error(e.getMessage(), e);
         }
     }
+    
+
 
     private static class LazyHolder{
         static final MqttPubModel _INSTANCE = new MqttPubModel();
     }
 
     public static MqttPubModel getInstance(){
+
         return LazyHolder._INSTANCE;
     }
 
     public static void main(String[] args) {
         getInstance().publish("device_id_test", true, java.time.LocalDateTime.now().getMinute());
     }
+
 
     private MqttMessage getMessage(String id, boolean state, int value){
 
@@ -56,9 +61,11 @@ public class MqttPubModel {
         json.addProperty("device_id",id);
         json.add("values",values);
 
+
         byte[] payload = json.toString().getBytes();
         MqttMessage msg = new MqttMessage(payload);
         msg.setRetained(true);
+
         System.out.println(msg);
         return msg;
     }
@@ -70,4 +77,5 @@ public class MqttPubModel {
             _logger.error(ex.getMessage(), ex);
         }
     }
+
 }
