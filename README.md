@@ -1,4 +1,4 @@
-# IoT Platform Service 
+# IoT Platform Service
 
 ### JAVA
 
@@ -7,7 +7,7 @@ sudo apt install openjdk-8-jdk maven
 ```
 
 | Action             | Command               |
-|--------------------|-----------------------|
+| ------------------ | --------------------- |
 | Run this project   | `mvn spring-boot:run` |
 | Build this project | `mvn package`         |
 
@@ -18,10 +18,10 @@ sudo apt install python3-pip
 pip3 install paho-mqtt pymysql pymysql-pooling
 ```
 
-| Action             | Command                      |
-|--------------------|------------------------------|
-| Run subcriber      | `python3 src_py/mqtt_sub.py` |
-| Build publisher    | `python3 src_py/mqtt_pub.py` |
+| Action          | Command                      |
+| --------------- | ---------------------------- |
+| Run subcriber   | `python3 src_py/mqtt_sub.py` |
+| Build publisher | `python3 src_py/mqtt_pub.py` |
 
 # Members
 

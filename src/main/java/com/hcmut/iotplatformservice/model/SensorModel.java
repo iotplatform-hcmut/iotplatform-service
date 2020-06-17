@@ -12,26 +12,26 @@ import org.apache.log4j.Logger;
 public class SensorModel {
     private static final ConnectionPool _dbPool = new ConnectionPool();
     private static final Logger _logger = Logger.getLogger(SensorModel.class);
-    
-    private SensorModel(){
+
+    private SensorModel() {
         BasicConfigurator.configure();
     }
 
-    private static class LazyHolder{
+    private static class LazyHolder {
         static final SensorModel _INSTANCE = new SensorModel();
     }
 
-    public static SensorModel getInstance(){
+    public static SensorModel getInstance() {
         return LazyHolder._INSTANCE;
     }
 
-    public String[] getAllIdSenSor(){
+    public String[] getAllIdSenSor() {
         String query = "SELECT id FROM sensor";
         List<String> lsId = new ArrayList<String>();
-        _dbPool.execute(query, rs->{
-            try{
+        _dbPool.execute(query, rs -> {
+            try {
                 lsId.add(rs.getString("id"));
-            }catch(SQLException ex){
+            } catch (SQLException ex) {
                 _logger.info(ex.getMessage(), ex);
             }
         });
