@@ -27,9 +27,9 @@ public class MqttPubModel {
         BasicConfigurator.configure();
         String publisherId = UUID.randomUUID().toString();
         try {
-            publisher = new MqttClient("tcp://13.76.250.158", publisherId);
+            publisher = new MqttClient("tcp://52.187.125.59", publisherId);
             options = new MqttConnectOptions();
-            options.setUserName("BKvm2");
+            options.setUserName("BKvm`");
             options.setPassword("Hcmut_CSE_2020".toCharArray());
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);

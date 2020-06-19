@@ -6,12 +6,13 @@ import pymysql.cursors
 from pymysqlpool.pool import Pool
 
 # MQTT Configuration
-MQTT_HOST = '13.76.250.158'
+MQTT_HOST = '52.187.125.59'
 MQTT_PORT = 1883
-MQTT_USERNAME = 'BKvm2'
+MQTT_USERNAME = 'BKvm'
 MQTT_PASSWORD = 'Hcmut_CSE_2020'
-PUB_TOPIC = ''
+PUB_TOPIC = 'Topic/Speaker'
 SUB_TOPIC = 'Topic/Mois'
+MQTT_MESSAGE = '[{"device_id":"Speaker","values":["%s","%s"]}]'
 
 # Database Configuration
 DB_HOST = 'iotplatform.xyz'
@@ -58,6 +59,10 @@ def on_message(client, userdata, message: mqtt.MQTTMessage):
             # Create a new record
             timestamp = int(time.time())
             for data in data_list:
+                # if data[1] < 100:
+                #     client.publish(PUB_TOPIC, MQTT_MESSAGE % (1, 100))
+                # elif data[1] > 800:
+                #     client.publish(PUB_TOPIC, MQTT_MESSAGE % (0, 0))
                 cursor.execute(SQL, (data[0], timestamp, data[1]))
                 print('[INFO] INSERT DATABASE: SUCCESS')
                 print('[INFO] %s, %s, %s' %

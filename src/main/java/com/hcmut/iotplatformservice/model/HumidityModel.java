@@ -18,7 +18,6 @@ import java.util.Collections;
 // Template model
 public class HumidityModel {
 
-
     private ConnectionPool _dbPool;
     private static final Logger _logger = Logger.getLogger(HumidityModel.class);
 
@@ -57,9 +56,7 @@ public class HumidityModel {
         return listId.toArray(arrId);
     }
 
-
     public List<SensorData> getAll(String[] ids, int startTime, int endTime, int min, int max, int limit) {
-
 
         String[] arrId = ids;
         if (ids[0].equals("all")) {
@@ -163,7 +160,7 @@ public class HumidityModel {
     private static void testGetAverageMaxMinHumidity() {
         String[] ids = { "d1_0", "d1_1" };
 
-        List<AverageMaxMinHumidity> test = getInstance().getAverageMaxMinHumidity(ids,0,2000000000);
+        List<AverageMaxMinHumidity> test = getInstance().getAverageMaxMinHumidity(ids, 0, 2000000000);
 
         System.out.println(test.toString());
     }
