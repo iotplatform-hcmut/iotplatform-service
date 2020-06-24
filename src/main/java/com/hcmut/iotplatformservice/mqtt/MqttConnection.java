@@ -7,14 +7,30 @@ import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@SpringBootApplication
+// import org.springframework.boot.autoconfigure.SpringBootApplication;
+// import org.springframework.scheduling.annotation.EnableScheduling;
+
+// @SpringBootApplication
+// @EnableScheduling
 class testMqtt {
+
+    // add @SpringBootApplication and @EnableScheduling before run
     public static void main(String[] args) {
         SpringApplication.run(testMqtt.class, args);
+    }
+
+    @Scheduled(zone = "Asia/Saigon", initialDelay = 1 * 500, fixedRate = 6 * 500)
+    private void autoPub() throws MqttPersistenceException, MqttException {
+        int value = java.time.LocalDateTime.now().getSecond();
+        MqttMessage msg = MqttPubModel.getInstance().getMessage("test_id", null, value);
+        MqttConnection.client.publish(MqttConnection._TOPIC_MOIS, msg);
     }
 }
 
@@ -24,6 +40,7 @@ public class MqttConnection {
     private static final Logger _logger = Logger.getLogger(MqttConnection.class);
 
     public static final String _TOPIC_SPEAKER = "Topic/Speaker";
+    public static final String _TOPIC_MOIS = "Topic/Mois";
 
     public static IMqttClient client;
 
@@ -31,7 +48,7 @@ public class MqttConnection {
         BasicConfigurator.configure();
         String clientId = UUID.randomUUID().toString();
         try {
-            String host = "tcp://13.76.250.158:1883";
+            // String host = "tcp://13.76.250.158:1883";
             String myHost = "tcp://iotplatform.xyz:1883";
             client = new MqttClient(myHost, clientId);
             MqttConnectOptions options = new MqttConnectOptions();
@@ -61,22 +78,4 @@ public class MqttConnection {
     // public static MqttConnection getInstance() {
     // return LazyHolder._INSTANCE;
     // }
-
-    // @Scheduled(zone="Asia/Saigon", initialDelay = 1 * 500, fixedRate = 4 * 500)
-    // public void writeCurrentTime() throws InterruptedException {
-
-    // System.out.println("Now is: "+ java.time.LocalDateTime.now().getSecond());
-    // // Thread.sleep(500L);
-    // }
 }
-
-// @ConditionalOnProperty("yourConditionPropery")
-// class SchedulingService {
-
-// @Scheduled
-// public void task1() {}
-
-// @Scheduled
-// public void task2() {}
-
-// }

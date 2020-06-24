@@ -29,11 +29,12 @@ public class MqttPubModel {
         return LazyHolder._INSTANCE;
     }
 
-    private MqttMessage getMessage(String id, boolean state, int value) {
+    public MqttMessage getMessage(String id, Boolean state, int value) {
         List<JsonObject> res = new ArrayList<>();
 
         JsonArray values = new JsonArray();
-        values.add(String.valueOf(state ? 1 : 0));
+        if (state != null)
+            values.add(String.valueOf(state ? 1 : 0));
         values.add(String.valueOf(value));
 
         JsonObject json = new JsonObject();
@@ -51,20 +52,18 @@ public class MqttPubModel {
     }
 
     public void publish(String id, boolean state, int value) throws MqttException, MqttPersistenceException {
-        try{
-            if (MqttConnection.isConnected()){
+        try {
+            if (MqttConnection.isConnected()) {
                 publisher.publish(MqttConnection._TOPIC_SPEAKER, getMessage(id, state, value));
-            }
-            else{
+            } else {
                 System.out.println("Mqtt not connect");
                 int REASON_CODE_SERVER_CONNECT_ERROR = 32103;
                 throw new MqttException(REASON_CODE_SERVER_CONNECT_ERROR);
             }
-        }
-        catch (MqttException ex) {
+        } catch (MqttException ex) {
             _logger.info(ex.getMessage(), ex);
         }
-        
+
     }
 
 }
