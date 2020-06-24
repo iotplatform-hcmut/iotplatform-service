@@ -1,43 +1,24 @@
-package com.hcmut.iotplatformservice.model;
+package com.hcmut.iotplatformservice.mqtt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 public class MqttPubModel {
-    private static final Logger _logger = Logger.getLogger(MqttPubModel.class);
-    private IMqttClient publisher;
 
-    private MqttConnectOptions options;
+    private static final Logger _logger = Logger.getLogger(MqttPubModel.class);
+    private final IMqttClient publisher = MqttConnection.client;
 
     private MqttPubModel() {
-        BasicConfigurator.configure();
-        String publisherId = UUID.randomUUID().toString();
-        try {
-            publisher = new MqttClient("tcp://13.76.250.158", publisherId);
-            options = new MqttConnectOptions();
-            options.setUserName("BKvm2");
-            options.setPassword("Hcmut_CSE_2020".toCharArray());
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
-            publisher.connect(options);
-        } catch (Exception e) {
-            _logger.error(e.getMessage(), e);
-        }
     }
 
     private static class LazyHolder {
@@ -45,17 +26,7 @@ public class MqttPubModel {
     }
 
     public static MqttPubModel getInstance() {
-
         return LazyHolder._INSTANCE;
-    }
-
-    public static void main(String[] args) {
-        try {
-            getInstance().publish("device_id_test", true, java.time.LocalDateTime.now().getMinute());
-        } catch (Exception e) {
-            _logger.error(e.getMessage(), e);
-        }
-
     }
 
     private MqttMessage getMessage(String id, boolean state, int value) {
@@ -74,11 +45,26 @@ public class MqttPubModel {
         MqttMessage msg = new MqttMessage(payload);
         msg.setRetained(true);
 
+        System.out.println("\npublish message : " + msg.toString());
+
         return msg;
     }
 
     public void publish(String id, boolean state, int value) throws MqttException, MqttPersistenceException {
-        publisher.publish("Topic/Speaker", getMessage(id, state, value));
+        try{
+            if (MqttConnection.isConnected()){
+                publisher.publish(MqttConnection._TOPIC_SPEAKER, getMessage(id, state, value));
+            }
+            else{
+                System.out.println("Mqtt not connect");
+                int REASON_CODE_SERVER_CONNECT_ERROR = 32103;
+                throw new MqttException(REASON_CODE_SERVER_CONNECT_ERROR);
+            }
+        }
+        catch (MqttException ex) {
+            _logger.info(ex.getMessage(), ex);
+        }
+        
     }
 
 }
