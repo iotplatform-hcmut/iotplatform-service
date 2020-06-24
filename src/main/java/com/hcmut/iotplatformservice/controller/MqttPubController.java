@@ -1,7 +1,7 @@
 package com.hcmut.iotplatformservice.controller;
 
 import com.google.gson.JsonObject;
-import com.hcmut.iotplatformservice.model.MqttPubModel;
+import com.hcmut.iotplatformservice.mqtt.MqttPubModel;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
