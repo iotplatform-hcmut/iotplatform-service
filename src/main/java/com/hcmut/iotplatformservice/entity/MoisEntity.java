@@ -1,18 +1,18 @@
 package com.hcmut.iotplatformservice.entity;
 
+import java.util.List;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-public class MoisEntity {
-    private String device_id;
-    private String[] values;
-
-    @Setter
-    private int timestamp;
-
-    public Object[] getArrObj() {
-        Object[] arr = { device_id, timestamp, Integer.parseInt(values[0]) };
-        return arr;
-    }
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class MoisEntity extends BaseEntity {
+    private static final long serialVersionUID = 7368350684486399059L;
+    private String id;
+    private List<Integer> values;
 }

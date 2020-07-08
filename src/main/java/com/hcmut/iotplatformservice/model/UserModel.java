@@ -1,80 +1,68 @@
 package com.hcmut.iotplatformservice.model;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hcmut.iotplatformservice.database.ConnectionPool;
+import com.hcmut.iotplatformservice.entity.UserEntity;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 
-// Template model
 public class UserModel {
 
     private ConnectionPool _dbPool = new ConnectionPool();
     private static final Logger _logger = Logger.getLogger(UserModel.class);
 
-    public String addUser(String name, String username, String password, String email, String phone, int birthday) {
+    public Boolean addUser(String name, String username, String password, String email, long phone, int birthday) {
         String query = "INSERT INTO user (name, username, password, email, phone, birthday) VALUES (?,?,?,?,?,?)";
-        Object[] arrParam = new Object[] {name, username, password, email, phone, birthday};
+        List<Object> arrParam = Arrays.asList(name, username, password, email, phone, birthday);
 
-        JsonObject message = new JsonObject();
         int count = _dbPool.execute(query, arrParam);
 
-        if(count == 0) message.addProperty("status", "error");
-        else message.addProperty("status", "ok");
-
-        return message.toString();
+        if (count == 0)
+            return false;
+        
+        return true;
     }
 
-    public String getUserById(int[] ids) {
-        List<JsonObject> lsUser = new LinkedList<>();        
+    public List<UserEntity> getAllUser() {
+        List<UserEntity> lsUser = new LinkedList<>();
 
-        String query = String.format(
-            "SELECT * from user WHERE id in (%s)", 
-            ConnectionPool.genQuestion(ids.length));
+        String query = "SELECT * from user";
 
-        Object[] arrParam = new Object[ids.length];
-        for(int i = 0; i < ids.length; ++i) arrParam[i] = ids[i];
-
-        _dbPool.execute(query, arrParam, rs -> {
+        _dbPool.execute(query, rs -> {
             try {
-                JsonObject json = new JsonObject();
-                json.addProperty("key", rs.getInt("id"));
-                json.addProperty("name", rs.getString("name"));
-                json.addProperty("username", rs.getString("username"));
-                json.addProperty("email", rs.getString("email"));
-                json.addProperty("phone", rs.getString("phone"));
-                json.addProperty("birthday", rs.getInt("birthday"));
-                lsUser.add(json);
+                UserEntity entity = new UserEntity();
+                entity.setId(rs.getInt("id"));
+                entity.setName(rs.getString("name"));
+                entity.setUsername(rs.getString("username"));
+                entity.setEmail(rs.getString("email"));
+                entity.setPhone(rs.getLong("phone"));
+                entity.setBirthday(rs.getInt("birthday"));
+                lsUser.add(entity);
             } catch (SQLException ex) {
                 _logger.info(ex.getMessage(), ex);
             }
         });
 
-        return new Gson().toJson(lsUser);
+        return lsUser;
     }
 
-    public String deleteUser(int[] ids) {
-        String query = String.format(
-            "DELETE FROM user WHERE id in (%s)", 
-            ConnectionPool.genQuestion(ids.length));
+    public Boolean deleteUser(Integer id) {
+        String query = "DELETE FROM user WHERE id = ?";
 
-        Object[] arrParam = new Object[ids.length];
-        for(int i = 0; i < ids.length; ++i) arrParam[i] = ids[i];
+        List<Object> params = new LinkedList<>();
+        params.add(id);
 
-        JsonObject message = new JsonObject();
+        int count = _dbPool.execute(query, params);
 
-        int count = _dbPool.execute(query, arrParam);
+        if (count == 0)
+            return false;
 
-
-        if(count == 0) message.addProperty("status", "error");
-        else message.addProperty("status", "ok");
-
-        return message.toString();
+        return true;
     }
 
     private UserModel() {

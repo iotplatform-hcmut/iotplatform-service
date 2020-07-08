@@ -65,10 +65,10 @@ public class ConnectionPool {
         }
     }
 
-    private void addParam(PreparedStatement stmt, Object[] arrParam) {
+    private void addParam(PreparedStatement stmt, List<Object> params) {
         try {
-            for (int idxParam = 0; idxParam < arrParam.length; idxParam++) {
-                Object param = arrParam[idxParam];
+            for (int idxParam = 0; idxParam < params.size(); idxParam++) {
+                Object param = params.get(idxParam);
                 int pos = idxParam + 1;
                 stmt.setObject(pos, param);
             }
@@ -120,7 +120,7 @@ public class ConnectionPool {
         return res;
     }
 
-    public void execute(String query, Object[] arrParam, Consumer<ResultSet> func) {
+    public void execute(String query, List<Object> arrParam, Consumer<ResultSet> func) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -144,7 +144,7 @@ public class ConnectionPool {
         }
     }
 
-    public int execute(String query, Object[] arrParam) {
+    public int execute(String query, List<Object> arrParam) {
         Connection conn = null;
         PreparedStatement stmt = null;
         int res = 0;
@@ -164,7 +164,7 @@ public class ConnectionPool {
         return res;
     }
 
-    public void executeBatch(String query, List<Object[]> listArrParam) {
+    public void executeBatch(String query, List<List<Object>> listArrParam) {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -173,7 +173,7 @@ public class ConnectionPool {
             }
             conn = _dataSource.getConnection();
             stmt = conn.prepareStatement(query);
-            for (Object[] arrParam : listArrParam) {
+            for (List<Object> arrParam : listArrParam) {
                 addParam(stmt, arrParam);
                 stmt.addBatch();
             }

@@ -5,16 +5,14 @@ import com.google.gson.JsonObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// Welcome controller
 @RestController
-public class WelcomeController {
+public class WelcomeController extends BaseController {
 
-	// READ
-	@GetMapping(value = "/", produces = "application/json")
-	public String welcome() {
-        JsonObject json = new JsonObject();
-        json.addProperty("Team", "IoT Platform");
-        json.addProperty("Message", "Welcome to IoT Platform API");
-        return json.toString();
-	}
+        @GetMapping(value = "/", produces = "application/json")
+        public String welcome() {
+                final JsonObject json = new JsonObject();
+                json.addProperty("Team", "IoT Platform");
+                json.addProperty("Message", "Welcome to IoT Platform API");
+                return json.toString();
+        }
 }

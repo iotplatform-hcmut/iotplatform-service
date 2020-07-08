@@ -4,20 +4,19 @@ import com.hcmut.iotplatformservice.entity.*;
 
 import java.sql.SQLException;
 
-import com.google.gson.Gson;
 import com.hcmut.iotplatformservice.database.ConnectionPool;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.LinkedList;
 
-// Motor model
 public class MotorModel {
 
     private ConnectionPool _dbPool;
-    private static final Logger _logger = Logger.getLogger(MotorModel.class);
+    private Logger _logger;
 
     public List<MotorEntity> getAllMotor() {
         List<MotorEntity> lsEntity = new LinkedList<>();
@@ -41,29 +40,32 @@ public class MotorModel {
         return lsEntity;
     }
 
-    public void addMotor(String id, String position, String description, Boolean state, Integer relay) {
+    public Boolean addMotor(String id, String position, String description, Boolean state, Integer relay) {
         String query = "INSERT INTO motor (`id`,`position`,`description`,`state`,`relay`) VALUES (?,?,?,?,?)";
 
-        _dbPool.execute(query, new Object[] { id, position, description, state, relay });
+        int count = _dbPool.execute(query, Arrays.asList(id, position, description, state, relay));
+
+        if (count == 0)
+            return false;
+
+        return true;
     }
 
-    private static void testGetValueByDeviceId() {
-        List<MotorEntity> lsMotor = getInstance().getAllMotor();
-        System.out.println(new Gson().toJson(lsMotor));
-    }
+    public Boolean deleteMotorById(String id) {
+        String query = "DELETE FROM motor WHERE id = ?";
 
-    private static void testAddMotor() {
-        getInstance().addMotor("d2_9", "Tiem banh", "Tuoi rau", false, 10000);
-    }
+        int count = _dbPool.execute(query, Arrays.asList(id));
 
-    public static void main(String[] args) {
-        testAddMotor();
-        testGetValueByDeviceId();
+        if (count == 0)
+            return false;
+
+        return true;
     }
 
     private MotorModel() {
         BasicConfigurator.configure();
         _dbPool = new ConnectionPool();
+        _logger = Logger.getLogger(this.getClass());
     }
 
     private static class LazyHolder {
