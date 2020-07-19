@@ -3,6 +3,7 @@ package com.hcmut.iotplatformservice.controller;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.hcmut.iotplatformservice.entity.HistoryEntity;
 import com.hcmut.iotplatformservice.entity.MotorEntity;
 import com.hcmut.iotplatformservice.model.MotorModel;
 import com.hcmut.iotplatformservice.mqtt.MqttPubModel;
@@ -20,6 +21,12 @@ public class MotorController extends BaseController {
     public String readMotorInfo() {
         List<MotorEntity> lsMotor = MotorModel.getInstance().getAllMotor();
         return new Gson().toJson(lsMotor);
+    }
+
+    @GetMapping(value = "api/motor/history", produces = "application/json")
+    public String readMotorHistoryInfo() {
+        List<HistoryEntity> lsMotorHistory = MotorModel.getInstance().getHistory();
+        return new Gson().toJson(lsMotorHistory);
     }
 
     @PostMapping(value = "api/motor", produces = "application/json")

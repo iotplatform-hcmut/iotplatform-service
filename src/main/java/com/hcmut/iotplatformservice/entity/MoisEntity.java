@@ -13,6 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MoisEntity extends BaseEntity {
     private static final long serialVersionUID = 7368350684486399059L;
-    private String id;
-    private List<Integer> values;
+    private String name;
+    private List<Integer> data;
 }

@@ -38,10 +38,10 @@ public class MoisModel {
 
         List<MoisEntity> lsEntity = new LinkedList<>();
 
-        datamap.forEach((id, values) -> {
+        datamap.forEach((name, data) -> {
             MoisEntity entity = new MoisEntity();
-            entity.setId(id);
-            entity.setValues(values);
+            entity.setName(name);
+            entity.setData(data);
             lsEntity.add(entity);
         });
 

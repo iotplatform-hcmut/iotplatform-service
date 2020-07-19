@@ -62,6 +62,44 @@ public class MotorModel {
         return true;
     }
 
+    public List<HistoryEntity> getHistory() {
+        List<HistoryEntity> lsEntity = new LinkedList<>();
+
+        String query = "SELECT * FROM history";
+
+        _dbPool.execute(query, rs -> {
+            try {
+                HistoryEntity entity = new HistoryEntity();
+                entity.setId(rs.getString("id"));
+                entity.setTimestamp(rs.getInt("timestamp"));
+                entity.setValue(rs.getInt("value"));
+                
+                lsEntity.add(entity);
+            } catch (SQLException ex) {
+                _logger.info(ex.getMessage(), ex);
+            }
+        });
+
+        return lsEntity;
+    }
+
+    public Boolean addHistory(String id, Integer timestamp, Integer value) {
+        String query = "INSERT INTO history (`id`,`timestamp`,`value`) VALUES (?,?,?)";
+
+        int count = _dbPool.execute(query, Arrays.asList(id, timestamp, value));
+
+        if (count == 0)
+            return false;
+
+        return true;
+    }
+
+
+    public static void main(String[] args) {
+        // System.out.println(getInstance().addHistory("d0_1", 1595137565, 500));
+        System.out.println(getInstance().getHistory());
+    }
+
     private MotorModel() {
         BasicConfigurator.configure();
         _dbPool = new ConnectionPool();
