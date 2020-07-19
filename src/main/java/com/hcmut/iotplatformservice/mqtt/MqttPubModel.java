@@ -37,10 +37,12 @@ public class MqttPubModel {
         return msg;
     }
 
-    public Boolean publish(String id, boolean state, int value) {
+    public Boolean publish(String ids[], boolean state, int value) {
         try {
             if (MqttConnection.isConnected()) {
-                publisher.publish(MqttConnection._TOPIC_SPEAKER, genMessage(id, state, value));
+                for (String id : ids) {
+                    publisher.publish(MqttConnection.TOPIC_SPEAKER, genMessage(id, state, value));
+                }
                 return true;
             } else {
                 int REASON_CODE_SERVER_CONNECT_ERROR = 32103;

@@ -56,10 +56,10 @@ public class MotorController extends BaseController {
     }
 
     @GetMapping(value = "/api/motor/publish", produces = "application/json")
-    public String pushlishDataToMotor(@RequestParam(value = "device_id") String deviceId,
+    public String pushlishDataToMotor(@RequestParam(value = "ids") String[] ids,
             @RequestParam(value = "state") Boolean state, @RequestParam(value = "value") int value) {
 
-        Boolean flag = MqttPubModel.getInstance().publish(deviceId, state, value);
+        Boolean flag = MqttPubModel.getInstance().publish(ids, state, value);
 
         if (flag) {
             return SUCCESS_MESSAGE;

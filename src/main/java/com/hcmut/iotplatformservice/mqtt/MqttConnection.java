@@ -14,8 +14,7 @@ public class MqttConnection {
 
     private static final Logger _logger = Logger.getLogger(MqttConnection.class);
 
-    public static final String _TOPIC_SPEAKER = "Topic/Speaker";
-    public static final String _TOPIC_MOIS = "Topic/Mois";
+    public static final String TOPIC_SPEAKER = "Topic/Speaker";
 
     public static IMqttClient client;
 
