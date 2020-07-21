@@ -13,8 +13,8 @@ import org.apache.log4j.BasicConfigurator;
 
 public class UserModel {
 
-    private ConnectionPool _dbPool = new ConnectionPool();
-    private static final Logger _logger = Logger.getLogger(UserModel.class);
+    private ConnectionPool _dbPool;
+    private Logger _logger;
 
     public Boolean addUser(String name, String username, String password, String email, long phone, int birthday) {
         String query = "INSERT INTO user (name, username, password, email, phone, birthday) VALUES (?,?,?,?,?,?)";
@@ -67,6 +67,8 @@ public class UserModel {
 
     private UserModel() {
         BasicConfigurator.configure();
+        _logger = Logger.getLogger(this.getClass());
+        _dbPool = new ConnectionPool();
     }
 
     private static class LazyHolder {

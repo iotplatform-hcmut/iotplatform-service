@@ -94,12 +94,6 @@ public class MotorModel {
         return true;
     }
 
-
-    public static void main(String[] args) {
-        // System.out.println(getInstance().addHistory("d0_1", 1595137565, 500));
-        System.out.println(getInstance().getHistory());
-    }
-
     private MotorModel() {
         BasicConfigurator.configure();
         _dbPool = new ConnectionPool();
